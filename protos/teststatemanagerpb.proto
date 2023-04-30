@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package teststatemanager;
 
-option go_package="./protos/teststatemanagerpb";
+option go_package="./protos";
 
 message StartTestRequest {
     int32 userId = 1;
