@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package teststatemanager;
+
+option go_package="./protos/teststatemanagerpb";
+
+service TestStateManagement{
+
+}
