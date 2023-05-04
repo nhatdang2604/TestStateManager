@@ -48,6 +48,7 @@ func (s *Server) Start() error {
 	grpcServer := grpc.NewServer()
 	protos.RegisterTestStateManagementServer(grpcServer, s.Controller)
 	fmt.Println("Test State Manager Service is running")
+
 	err = grpcServer.Serve(listener)
 
 	if nil != err {
