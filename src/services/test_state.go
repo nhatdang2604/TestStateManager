@@ -6,6 +6,7 @@ import (
 
 	"github.com/nhatdang2604/TestStateManager/src/constants"
 	"github.com/nhatdang2604/TestStateManager/src/daos"
+	"github.com/nhatdang2604/TestStateManager/src/datatypes"
 	"github.com/nhatdang2604/TestStateManager/src/helpers"
 )
 
@@ -35,7 +36,7 @@ func (s *TestStateService) StartTest(userId int, testId int) (int, error) {
 
 	//Casting the value in the map into helpers.Timer
 	timer := (s.InprogressTestAttemptMap[testAttemptId]).(*helpers.Timer)
-	channel := make(chan helpers.RemainTime)
+	channel := make(chan datatypes.RemainTime)
 	go timer.CountDown(channel)
 	<-channel
 	defer s.Mutex.Unlock()

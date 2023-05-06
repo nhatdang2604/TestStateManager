@@ -8,6 +8,7 @@ import (
 
 	"github.com/nhatdang2604/TestStateManager/src/constants"
 	"github.com/nhatdang2604/TestStateManager/src/controllers"
+	"github.com/nhatdang2604/TestStateManager/src/helpers"
 	"github.com/nhatdang2604/TestStateManager/src/protos"
 	"google.golang.org/grpc"
 )
@@ -19,12 +20,7 @@ type Server struct {
 
 func NewServer() *Server {
 
-	configConstant, err := constants.NewConfigConstant()
-
-	if nil != err {
-		log.Fatalf("Error while creating server")
-		return nil
-	}
+	configConstant := constants.GetConfigConstant()
 
 	server := &Server{
 		Constant:   configConstant,
@@ -45,6 +41,11 @@ func (s *Server) Start() error {
 		return err
 	}
 
+	//Trying to close the database, after the server has been shutting down
+	db := helpers.GetDB()
+	defer db.Connection.Close()
+
+	//Start the server
 	grpcServer := grpc.NewServer()
 	protos.RegisterTestStateManagementServer(grpcServer, s.Controller)
 	fmt.Println("Test State Manager Service is running")

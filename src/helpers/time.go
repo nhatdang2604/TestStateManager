@@ -4,20 +4,15 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
+
+	"github.com/nhatdang2604/TestStateManager/src/datatypes"
 )
 
-//Remain time while countdown
-type RemainTime struct {
-	Hour   int
-	Minute int
-	Second int
-}
-
 type Timer struct {
-	RemainTime RemainTime
+	RemainTime datatypes.RemainTime
 }
 
-func NewTimer(remainTime RemainTime) *Timer {
+func NewTimer(remainTime datatypes.RemainTime) *Timer {
 	var timer *Timer = new(Timer)
 	timer.RemainTime = remainTime
 	return timer
@@ -52,7 +47,7 @@ func (t *Timer) ReduceOneSecond() {
 	}
 }
 
-func (t *Timer) CountDown(channel chan RemainTime) {
+func (t *Timer) CountDown(channel chan datatypes.RemainTime) {
 	id := rand.Intn(1000)
 	var ticker *time.Ticker = time.NewTicker(1 * time.Second)
 
