@@ -7,8 +7,8 @@ CREATE TABLE test_attempt (
     test_id INT DEFAULT NULL,
 
     state INT DEFAULT NULL,
-    started_at DATETIME,
-    ended_at DATETIME,
+    started_at TIMESTAMP,
+    ended_at TIMESTAMP,
 
     PRIMARY KEY(attempt_id)
 );

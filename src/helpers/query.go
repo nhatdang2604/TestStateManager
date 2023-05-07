@@ -1,23 +1,26 @@
 package helpers
 
-import "strings"
+import (
+	"log"
+	"strings"
+)
 
 func GetBatchInsertQuery(
 	tableName string,
-	columnName []string,
+	columnNames []string,
 	insertData [](map[string]interface{}),
-) string {
+) (sql string, bindingValues []interface{}) {
 
 	var stringBuilder strings.Builder
-	stringBuilder.WriteString("INSERT INTO " + tableName + "(" + strings.Join(columnName, ", ") + ") VALUES ")
+	stringBuilder.WriteString("INSERT INTO " + tableName + "(" + strings.Join(columnNames, ", ") + ") VALUES ")
 
 	var questionArray []string
 	var questionString string
 	var questionStringArray []string
-	var sql string
+	bindingValues = []interface{}{}
 
 	//Build []string{"?", "?", "?", ....}
-	for _, _ = range columnName {
+	for range columnNames {
 		questionArray = append(questionArray, "?")
 	}
 
@@ -25,8 +28,13 @@ func GetBatchInsertQuery(
 	questionString = "(" + strings.Join(questionArray, ", ") + ")"
 
 	//Build []string{"(?, ?, ?, ...., ?)", "(?, ?, ?, ...., ?)", "(?, ?, ?, ...., ?)", ..., "(?, ?, ?, ...., ?)"}
-	for _, _ = range insertData {
+	for _, rowData := range insertData {
 		questionStringArray = append(questionStringArray, questionString)
+
+		//Build the bindingValues for "?"
+		for _, columnName := range columnNames {
+			bindingValues = append(bindingValues, rowData[columnName])
+		}
 	}
 
 	//Build "(?, ?, ?, ...., ?), (?, ?, ?, ...., ?), (?, ?, ?, ...., ?), ... (?, ?, ?, ...., ?)"
@@ -35,5 +43,6 @@ func GetBatchInsertQuery(
 	stringBuilder.WriteString(strings.Join(questionStringArray, ", "))
 	sql = stringBuilder.String()
 
-	return sql
+	log.Printf("SQL: %v, with value: %v", sql, bindingValues)
+	return sql, bindingValues
 }

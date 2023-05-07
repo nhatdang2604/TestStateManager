@@ -6,7 +6,6 @@ import (
 
 	"github.com/nhatdang2604/TestStateManager/src/constants"
 	"github.com/nhatdang2604/TestStateManager/src/daos"
-	"github.com/nhatdang2604/TestStateManager/src/datatypes"
 	"github.com/nhatdang2604/TestStateManager/src/helpers"
 )
 
@@ -14,6 +13,15 @@ type TestStateService struct {
 	TestStateDao             daos.TestStateDao
 	Mutex                    sync.Mutex
 	InprogressTestAttemptMap map[int]interface{}
+}
+
+func NewTestStateService() *TestStateService {
+	var service *TestStateService = &TestStateService{
+		InprogressTestAttemptMap: map[int]interface{}{},
+		TestStateDao:             daos.NewTestStateDAO(),
+	}
+
+	return service
 }
 
 func (s *TestStateService) StartTest(userId int, testId int) (int, error) {
@@ -36,9 +44,7 @@ func (s *TestStateService) StartTest(userId int, testId int) (int, error) {
 
 	//Casting the value in the map into helpers.Timer
 	timer := (s.InprogressTestAttemptMap[testAttemptId]).(*helpers.Timer)
-	channel := make(chan datatypes.RemainTime)
-	go timer.CountDown(channel)
-	<-channel
+	go timer.CountDown()
 	defer s.Mutex.Unlock()
 
 	return testAttemptId, err

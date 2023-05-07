@@ -9,7 +9,14 @@ import (
 
 type TestStateManagementController struct {
 	protos.UnimplementedTestStateManagementServer
-	TestStateService services.TestStateService
+	TestStateService *services.TestStateService
+}
+
+func NewTestStateManagementController() *TestStateManagementController {
+	var controller *TestStateManagementController = &TestStateManagementController{
+		TestStateService: services.NewTestStateService(),
+	}
+	return controller
 }
 
 func (c *TestStateManagementController) GetInprogressTest(ctx context.Context, req *protos.GetInprogressTestRequest) (*protos.GetInprogressTestResponse, error) {

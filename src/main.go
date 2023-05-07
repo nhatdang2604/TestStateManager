@@ -24,7 +24,7 @@ func NewServer() *Server {
 
 	server := &Server{
 		Constant:   configConstant,
-		Controller: new(controllers.TestStateManagementController),
+		Controller: controllers.NewTestStateManagementController(),
 	}
 	return server
 }
@@ -44,6 +44,9 @@ func (s *Server) Start() error {
 	//Trying to close the database, after the server has been shutting down
 	db := helpers.GetDB()
 	defer db.Connection.Close()
+
+	go s.Controller.TestStateService.StartTest(1, 2)
+	go s.Controller.TestStateService.StartTest(1, 3)
 
 	//Start the server
 	grpcServer := grpc.NewServer()

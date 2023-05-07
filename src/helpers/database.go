@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/nhatdang2604/TestStateManager/src/constants"
 )
 
@@ -45,7 +46,7 @@ func NewDB(
 func InitDB() *DB {
 	var db *DB = nil
 	config := constants.GetConfigConstant()
-	if nil != config {
+	if nil == config {
 		log.Fatalf("Error: error on loading config constant, from database helper")
 		return db
 	}

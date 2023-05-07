@@ -47,7 +47,7 @@ func (t *Timer) ReduceOneSecond() {
 	}
 }
 
-func (t *Timer) CountDown(channel chan datatypes.RemainTime) {
+func (t *Timer) CountDown() {
 	id := rand.Intn(1000)
 	var ticker *time.Ticker = time.NewTicker(1 * time.Second)
 
@@ -57,7 +57,6 @@ func (t *Timer) CountDown(channel chan datatypes.RemainTime) {
 		fmt.Printf("Id: %v, Hour: %v, Min: %v, Second: %v \r\n", id, t.RemainTime.Hour, t.RemainTime.Minute, t.RemainTime.Second)
 		if t.isStop() {
 			ticker.Stop()
-			channel <- t.RemainTime
 			break
 		}
 	}
