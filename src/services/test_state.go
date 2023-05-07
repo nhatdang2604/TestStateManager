@@ -6,6 +6,7 @@ import (
 
 	"github.com/nhatdang2604/TestStateManager/src/constants"
 	"github.com/nhatdang2604/TestStateManager/src/daos"
+	"github.com/nhatdang2604/TestStateManager/src/datatypes"
 	"github.com/nhatdang2604/TestStateManager/src/helpers"
 )
 
@@ -48,4 +49,18 @@ func (s *TestStateService) StartTest(userId int, testId int) (int, error) {
 	defer s.Mutex.Unlock()
 
 	return testAttemptId, err
+}
+
+func (s *TestStateService) GetRemainTimeOfInprogressTest(testAttemptId int32) int {
+
+	timer, ok := (s.InprogressTestAttemptMap[int(testAttemptId)]).(*helpers.Timer)
+	if !ok {
+		return -1
+	}
+
+	var remainTime datatypes.RemainTime = timer.RemainTime
+	var remainTimeInSecond int = remainTime.Hour*3600 + remainTime.Minute*60 + remainTime.Second
+
+	log.Printf("%v", remainTimeInSecond)
+	return remainTimeInSecond
 }

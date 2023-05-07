@@ -20,7 +20,14 @@ func NewTestStateManagementController() *TestStateManagementController {
 }
 
 func (c *TestStateManagementController) GetInprogressTest(ctx context.Context, req *protos.GetInprogressTestRequest) (*protos.GetInprogressTestResponse, error) {
-	return nil, nil
+
+	var testAttemptId int32 = req.GetTestAttemptId()
+	var timeRemainInSecond = c.TestStateService.GetRemainTimeOfInprogressTest(testAttemptId)
+	var response *protos.GetInprogressTestResponse = &protos.GetInprogressTestResponse{
+		TimeRemainInSecond: int32(timeRemainInSecond),
+	}
+
+	return response, nil
 }
 
 func (c *TestStateManagementController) StartTest(ctx context.Context, req *protos.StartTestRequest) (*protos.StartTestResponse, error) {
