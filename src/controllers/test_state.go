@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/nhatdang2604/TestStateManager/src/protos"
 	"github.com/nhatdang2604/TestStateManager/src/services"
@@ -47,5 +48,19 @@ func (c *TestStateManagementController) StartTest(ctx context.Context, req *prot
 }
 
 func (c *TestStateManagementController) EndTest(ctx context.Context, req *protos.EndTestRequest) (*protos.EndTestResponse, error) {
-	return nil, nil
+
+	var testAttemptId int32 = req.GetTestAttemptId()
+
+	var message string = "The test has been submit"
+	errorCode, err := c.TestStateService.EndTest(testAttemptId)
+	if nil != err {
+		message = fmt.Sprintf("%v", err)
+	}
+
+	var response *protos.EndTestResponse = &protos.EndTestResponse{
+		ErrorCode: int32(errorCode),
+		Message:   message,
+	}
+
+	return response, err
 }

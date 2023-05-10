@@ -5,7 +5,6 @@ import (
 	"log"
 	"net"
 	"strings"
-	"time"
 
 	"github.com/nhatdang2604/TestStateManager/src/constants"
 	"github.com/nhatdang2604/TestStateManager/src/controllers"
@@ -45,13 +44,6 @@ func (s *Server) Start() error {
 	//Trying to close the database, after the server has been shutting down
 	db := helpers.GetDB()
 	defer db.Connection.Close()
-
-	go s.Controller.TestStateService.StartTest(1, 2)
-	go s.Controller.TestStateService.StartTest(1, 3)
-
-	time.Sleep(10 * time.Second)
-	go s.Controller.TestStateService.GetRemainTimeOfInprogressTest(15)
-	go s.Controller.TestStateService.GetRemainTimeOfInprogressTest(16)
 
 	//Start the server
 	grpcServer := grpc.NewServer()

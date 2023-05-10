@@ -1,13 +1,17 @@
 package services
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/nhatdang2604/TestStateManager/src/constants"
 	"github.com/nhatdang2604/TestStateManager/src/daos"
 	"github.com/nhatdang2604/TestStateManager/src/datatypes"
-	"github.com/nhatdang2604/TestStateManager/src/helpers"
+	"github.com/nhatdang2604/TestStateManager/src/observations/observables"
+	"github.com/nhatdang2604/TestStateManager/src/observations/observers"
 )
 
 type TestStateService struct {
@@ -25,6 +29,10 @@ func NewTestStateService() *TestStateService {
 	return service
 }
 
+func (s *TestStateService) AfterStopTime() {
+	fmt.Println("The time has been stopped")
+}
+
 func (s *TestStateService) StartTest(userId int, testId int) (int, error) {
 
 	userTestMap := map[int]([]int){
@@ -33,7 +41,7 @@ func (s *TestStateService) StartTest(userId int, testId int) (int, error) {
 	testAttemptIds, err := s.TestStateDao.CreateTestAttempts(userTestMap)
 
 	if nil != err {
-		log.Fatalf("Service: Error while creating test attemp with user's id = %v and test's id = %v", userId, testId)
+		log.Printf("Service: Error while creating test attemp with user's id = %v and test's id = %v", userId, testId)
 		return -1, err
 	}
 
@@ -41,10 +49,10 @@ func (s *TestStateService) StartTest(userId int, testId int) (int, error) {
 
 	//Start the countdown timer
 	s.Mutex.Lock()
-	s.InprogressTestAttemptMap[testAttemptId] = helpers.NewTimer(constants.READING_TEST_DURATION)
+	s.InprogressTestAttemptMap[testAttemptId] = observables.NewTimer(constants.READING_TEST_DURATION, []observers.Time{s})
 
-	//Casting the value in the map into helpers.Timer
-	timer := (s.InprogressTestAttemptMap[testAttemptId]).(*helpers.Timer)
+	//Casting the value in the map into observables.Timer
+	timer := (s.InprogressTestAttemptMap[testAttemptId]).(*observables.Timer)
 	go timer.CountDown()
 	defer s.Mutex.Unlock()
 
@@ -53,7 +61,7 @@ func (s *TestStateService) StartTest(userId int, testId int) (int, error) {
 
 func (s *TestStateService) GetRemainTimeOfInprogressTest(testAttemptId int32) int {
 
-	timer, ok := (s.InprogressTestAttemptMap[int(testAttemptId)]).(*helpers.Timer)
+	timer, ok := (s.InprogressTestAttemptMap[int(testAttemptId)]).(*observables.Timer)
 	if !ok {
 		return -1
 	}
@@ -63,4 +71,56 @@ func (s *TestStateService) GetRemainTimeOfInprogressTest(testAttemptId int32) in
 
 	log.Printf("%v", remainTimeInSecond)
 	return remainTimeInSecond
+}
+
+func (s *TestStateService) EndTest(testAttemptId int32) (errorCode int, err error) {
+
+	errorCode = 0
+	var testAttemptIds []interface{} = []interface{}{testAttemptId}
+	testAttempts, err := s.TestStateDao.FindTestAttemptByIds(testAttemptIds, true)
+
+	if nil != err {
+		log.Printf("Error on checking if the test attempt is exists")
+		errorCode = 1
+		return errorCode, err
+	}
+
+	if 0 == len(testAttempts) {
+		log.Printf("The test attempt with id = %v is not exists", testAttemptId)
+		errorCode = 2
+		return errorCode, err
+	}
+
+	//Update the test attempt's data after ending it
+	var idColumnName string = "attempt_id"
+	var endTestAttempt = map[string]interface{}{
+		idColumnName: testAttempts[0][idColumnName],
+		"state":      constants.TEST_STATE_END,
+		"ended_at":   time.Now().Format(constants.MARIADB_TIMESTAMP_FORMAT),
+	}
+
+	//Execute the query from database to terminate the test attempt
+	errorCode, err = s.TestStateDao.UpdateTestAttempt(endTestAttempt, idColumnName)
+	if nil != err {
+		log.Printf("Error on ending the test with id = %v", testAttemptId)
+		return errorCode, err
+	}
+
+	//Terminate the timer, and delete the timer from our map
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+	container, ok := s.InprogressTestAttemptMap[int(testAttemptId)]
+	if !ok {
+		var msg string = fmt.Sprintf("The test attempt wit id = %v is already ended", testAttemptId)
+		errorCode = 3
+		err = errors.New(msg)
+		log.Println(msg)
+		return errorCode, err
+	}
+
+	var timer *observables.Timer = container.(*observables.Timer)
+	timer.Stop()
+	delete(s.InprogressTestAttemptMap, int(testAttemptId))
+
+	return errorCode, err
 }

@@ -3,7 +3,7 @@ package constants
 import "github.com/nhatdang2604/TestStateManager/src/datatypes"
 
 const (
-	MARIADB_TIMESTAMP_FORMAT = "2006-01-02 15:04:05"
+	MARIADB_TIMESTAMP_FORMAT string = "2006-01-02 15:04:05"
 )
 
 var (
