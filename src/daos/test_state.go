@@ -11,7 +11,7 @@ import (
 
 var (
 	TEST_ATTEMP_TABLE_NAME = "test_attempt"
-	TEST_ATTEMPT_COLUMNS   = []string{"attempt_id", "user_id", "test_id", "state", "started_at", "ended_at"}
+	TEST_ATTEMPT_COLUMNS   = []string{"test_attempt_id", "user_id", "original_test_id", "state", "started_at", "ended_at"}
 )
 
 type TestStateDao struct{}

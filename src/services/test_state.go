@@ -92,7 +92,7 @@ func (s *TestStateService) EndTest(testAttemptId int32) (errorCode int, err erro
 	}
 
 	//Update the test attempt's data after ending it
-	var idColumnName string = "attempt_id"
+	var idColumnName string = "test_attempt_id"
 	var endTestAttempt = map[string]interface{}{
 		idColumnName: testAttempts[0][idColumnName],
 		"state":      constants.TEST_STATE_END,
