@@ -1,7 +1,6 @@
 package daos
 
 import (
-	"database/sql"
 	"log"
 	"time"
 
@@ -44,7 +43,7 @@ func (d *TestStateDao) CreateTestAttempts(userTestAttemptMap map[int]([]int)) ([
 				columnNames[1]: testId,
 				columnNames[2]: constants.TEST_STATE_START,
 				columnNames[3]: time.Now().Format(constants.MARIADB_TIMESTAMP_FORMAT),
-				columnNames[4]: sql.NullTime{},
+				columnNames[4]: 0,
 			}
 
 			insertData[index] = buffer
