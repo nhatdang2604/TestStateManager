@@ -8,7 +8,7 @@ RUN go mod download
 
 EXPOSE 8060
 
-COPY [".env"]
+COPY .env /
 
 COPY src/ ./src/
 
